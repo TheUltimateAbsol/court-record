@@ -8,6 +8,11 @@
 			"matches": ["http://www.pokebeach.com/*"],
 			"css": ["style-beach.css"],
 			"js" : ["beachMarkup.js"]
+		},
+		{
+			"matches": ["https://www.quicktopic.com/*"],
+			"css": ["style-qt.css"],
+			"js" : ["qtMarkup.js"]
 		}
 	],
 	"browser_action": {

@@ -1,5 +1,14 @@
-.important .primaryContent{
+.important.messagerow{
 	background-image: linear-gradient(to right, rgb(255, 253, 221) 70%, rgb(255, 60, 16) 100%) !important;
+}
+.messageMeta{
+	float: right;
+	display: block;
+	padding-top: 20px;
+}
+.messageMeta .item{
+	float: left;
+	font-family: "Courier";
 }
 input[type="checkbox"].important-checkbox {
   width: 15px;
