@@ -1,5 +1,12 @@
 chrome.storage.local.get(function(result){console.log(result)})
 
+function removeElementsByClass(root, className){
+    var elements = root.getElementsByClassName(className);
+    while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
+
 function parseDate(dateString, timeString){
 	let pmPos = timeString.indexOf("PM");
 	let amPos = timeString.indexOf("AM");
@@ -11,7 +18,6 @@ function parseDate(dateString, timeString){
 	
 	timeString = timeString.substring(0, atPos+2);
 	let tempDate = new Date(dateString + " " + timeString);
-	console.log(tempDate);
 	
 	return tempDate.getTime() / 1000;
 }
@@ -39,14 +45,18 @@ function packagePost(item){
 	}
 	
 	//Strip checkbox from post
-	if (pc){
-		let messageMeta = pc.getElementsByClassName("messageMeta");
-		if (messageMeta) messageMeta = messageMeta[0];
-		
-		if(messageMeta) pc.removeChild(messageMeta);
-	}
+	removeElementsByClass(node, "messageMeta");
 	
-	html = node.innerHTML;
+	//Expand image URLs
+	(Array.from(node.getElementsByTagName("img"))).forEach(function (image){
+		let absolute = image.src;
+		image.setAttribute("src", absolute);
+	});
+	
+	
+	let wrap = document.createElement('div');
+	wrap.appendChild(node);
+	html = wrap.innerHTML;
 
 	return {
 		user : user,
@@ -100,14 +110,14 @@ x.forEach(function (item) {
 	//Checkbox functionality (Will be set once added)
 	function onChange(box){
 		if (box.checked){
-			item.classList.add("important");
 			chrome.storage.local.set({[id]: packagePost(item)}, function() {
+				  item.classList.add("important");
 		          console.log(id + ' added to storage!');
 		    });
 		}
 		else{
-			item.classList.remove("important");
 			chrome.storage.local.remove([id], function() {
+				  item.classList.remove("important");
 		          console.log(id + ' removed from storage!');
 		    });
 		}
@@ -118,7 +128,9 @@ x.forEach(function (item) {
 		messagecell.appendChild(div);
 		messagecell.getElementsByClassName("important-label")[0]
 			.getElementsByClassName("important-checkbox")[0]
-			.onchange = function() {onChange(this);};
+			.onchange = function() {
+				onChange(this);
+			};
 	}
 		
 })

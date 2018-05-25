@@ -3,6 +3,10 @@
 	"version" : "1.0",
 	"description" : "Marks up Forum and QuickTopic posts for easy analysis",
 	"permissions" : ["activeTab", "declarativeContent", "storage"],
+	"background": {
+    	"scripts": ["background.js"],
+    	"persistent": false
+    },
 	"content_scripts" : [
 		{
 			"matches": ["http://www.pokebeach.com/*"],

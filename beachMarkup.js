@@ -1,5 +1,11 @@
 chrome.storage.local.get(function(result){console.log(result)})
 
+function removeElementsByClass(root, className){
+    var elements = root.getElementsByClassName(className);
+    while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
 function parseDate(dateString){
 	let atPos = dateString.indexOf("at");
 	let date = dateString.substring(0, atPos);
@@ -49,7 +55,26 @@ function packagePost(item){
 		if(messageMeta) pc.removeChild(messageMeta);
 	}
 	
-	html = node.innerHTML;
+	//Expand image URLs
+	(Array.from(node.getElementsByTagName("img"))).forEach(function (image){
+		let absolute = image.src;
+		image.setAttribute("src", absolute);
+	});
+	
+	//Strip links from User info
+	let userInfo = node.getElementsByClassName("messageUserInfo")[0];
+	if (userInfo){
+		(Array.from(userInfo.getElementsByTagName("a"))).forEach(function (link){
+			link.removeAttribute("href");
+		});
+	}
+	
+	//Remove New indicator
+	removeElementsByClass(node, "newIndicator");
+	
+	let wrap = document.createElement('div');
+	wrap.appendChild(node);
+	html = wrap.innerHTML;
 
 	return {
 		user : user,
@@ -90,14 +115,14 @@ x.forEach(function (item) {
 	//Checkbox functionality (Will be set once added)
 	function onChange(box){
 		if (box.checked){
-			item.classList.add("important");
 			chrome.storage.local.set({[id]: packagePost(item)}, function() {
+				  item.classList.add("important");
 		          console.log(id + ' added to storage!');
 		    });
 		}
 		else{
-			item.classList.remove("important");
 			chrome.storage.local.remove([id], function() {
+				  item.classList.remove("important");
 		          console.log(id + ' removed from storage!');
 		    });
 		}
