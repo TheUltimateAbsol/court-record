@@ -1,4 +1,5 @@
 chrome.storage.local.get(function(result){console.log(result)})
+//chrome.storage.local.clear();
 
 function removeElementsByClass(root, className){
     var elements = root.getElementsByClassName(className);
@@ -46,6 +47,7 @@ function packagePost(item){
 	
 	//Strip checkbox from post
 	removeElementsByClass(node, "messageMeta");
+	removeElementsByClass(node, "topic-messagecontrolsfloat");
 	
 	//Expand image URLs
 	(Array.from(node.getElementsByTagName("img"))).forEach(function (image){
@@ -100,7 +102,8 @@ x.forEach(function (item) {
 	div.appendChild(label2);
 	
 	//Mark as important if id is already in the storage
-	chrome.storage.local.get(id, function(data){
+	chrome.storage.local.get("posts", function(data){
+		data = data["posts"];
 		if (typeof data[id] !== 'undefined') {
 			item.classList.add("important");
 			check.checked = true;
@@ -110,15 +113,26 @@ x.forEach(function (item) {
 	//Checkbox functionality (Will be set once added)
 	function onChange(box){
 		if (box.checked){
-			chrome.storage.local.set({[id]: packagePost(item)}, function() {
-				  item.classList.add("important");
-		          console.log(id + ' added to storage!');
+			  chrome.storage.local.get("posts", function(data){
+					data = data["posts"];
+					if (data === undefined) data = {};
+					data[id] = packagePost(item);
+					console.log(data);
+					chrome.storage.local.set({"posts" : data}, function() {
+						item.classList.add("important");
+						check.checked = true;
+					});
 		    });
 		}
 		else{
-			chrome.storage.local.remove([id], function() {
-				  item.classList.remove("important");
-		          console.log(id + ' removed from storage!');
+			chrome.storage.local.get("posts", function(data){
+					data = data["posts"];
+					if (data === undefined) data = {};
+					data[id] = undefined;
+					chrome.storage.local.set({"posts" : data}, function() {
+						  item.classList.remove("important");
+				          console.log(id + ' removed from storage!');
+					});
 		    });
 		}
 	};

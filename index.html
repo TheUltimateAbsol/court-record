@@ -8,16 +8,16 @@
   </head>
   <body>
   
-  <p id="allmessages">
-  
-  </p>
-  
-  <table width="100%">
-  <tbody id="qtmessageList">
-  <!-- Messages go here -->
-  </tbody>
-  </table>
-  <ol class="messageList" id="messageList"></ol>
+  <div id="optionsBar" style="float:left; height:100%;">
+  	<form class="radioOptions">
+  		<h3>Type of Post</h3>
+		<input type="radio" name="postType" value="all" id="type-all" checked><label for="type-all">All</label>
+		<input type="radio" name="postType" value="pokebeach" id="type-pokebeach"><label for="type-pokebeach" >PokeBeach only</label>
+		<input type="radio" name="postType" value="qt" id="type-qt"><label for="type-qt" >QuickTopic only</label>
+	</form>  
+  </div>
+  <div id="allmessages"></div>
+
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/highslide/highslide-styles.css"/>
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/highslide/card-highslide.css"/>
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/tooltipster.css"/>
@@ -32,6 +32,8 @@
   <link rel="stylesheet" property="stylesheet" type="text/css" href="https://www.quicktopic.com/css/qt-handheld.css"/>
   <link rel="stylesheet" property="stylesheet" type="text/css" href="https://www.quicktopic.com/css/qt-topic.css"/>
   <link rel="stylesheet" property="stylesheet" type="text/css" href="https://www.quicktopic.com/css/vtip.css"/>
+  
+  <link rel="stylesheet" type="text/css" href="style-query.css"/>
   <script src="outputData.js"></script>
   </body>
 </html>

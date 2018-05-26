@@ -1,0 +1,36 @@
+#optionsBar {
+    height: 100%; /* Full-height: remove this if you want "auto" height */
+    width: 15%; /* Set the width of the sidebar */
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    z-index: 1; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    background-color: white; /* Black */
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 20px;
+    border-right: 4px dotted blue;
+}
+
+.radioOptions input[type=radio],
+input.radio {
+  float: left;
+  clear: none;
+  margin: 2px 0 0 2px;
+}
+
+#allmessages{
+	height: 100%; /* Full-height: remove this if you want "auto" height */
+    width: 85%; /* Set the width of the sidebar */
+    padding-top: 20px;
+    margin-left: 15%;
+    border-radius: 20px 20px;
+    box-shadow: 0 1px 4px #333;
+    background: white;
+    padding: 20px 20px;
+}
+
+
+body{
+	background: none !important;
+	box-shadow: none;
+}
