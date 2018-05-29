@@ -18,8 +18,8 @@ input.radio {
   margin: 2px 0 0 2px;
 }
 
-#allmessages{
-	height: 100%; /* Full-height: remove this if you want "auto" height */
+#content{
+	height: 100%;  Full-height: remove this if you want "auto" height */
     width: 85%; /* Set the width of the sidebar */
     padding-top: 20px;
     margin-left: 15%;
@@ -33,4 +33,21 @@ input.radio {
 body{
 	background: none !important;
 	box-shadow: none;
+}
+
+.delete-button {
+	height: 20px;
+	width: 20px;
+	position: absolute;
+	right: 0;
+	top: 0;
+	display: none;
+}
+
+.message-item {
+	position: relative;
+}
+
+.message-item:hover .delete-button{
+	display: block;
 }

@@ -9,14 +9,20 @@
   <body>
   
   <div id="optionsBar" style="float:left; height:100%;">
-  	<form class="radioOptions">
+  	<form class="radioOptions" id="queryParameters">
   		<h3>Type of Post</h3>
 		<input type="radio" name="postType" value="all" id="type-all" checked><label for="type-all">All</label>
 		<input type="radio" name="postType" value="pokebeach" id="type-pokebeach"><label for="type-pokebeach" >PokeBeach only</label>
 		<input type="radio" name="postType" value="qt" id="type-qt"><label for="type-qt" >QuickTopic only</label>
-	</form>  
+	</form>
+	<select name="posted-by" form="queryParameters" id="posted-by"></select>
+	<a href="#" id="messages-tab">Messages</a> | <a href="#" id="players-tab">Users</a>
   </div>
-  <div id="allmessages"></div>
+  <div id="content">
+  	<div id="allmessages"></div>
+  	<div id="players" style="display:none;"></div>
+  	
+  </div>
 
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/highslide/highslide-styles.css"/>
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/highslide/card-highslide.css"/>

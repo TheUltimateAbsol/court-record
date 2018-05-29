@@ -1,5 +1,4 @@
 chrome.storage.local.get(function(result){console.log(result)})
-//chrome.storage.local.clear();
 
 function removeElementsByClass(root, className){
     var elements = root.getElementsByClassName(className);
@@ -23,7 +22,7 @@ function parseDate(dateString, timeString){
 	return tempDate.getTime() / 1000;
 }
 
-function packagePost(item){
+function packagePost(item, id){
 	var node = item.cloneNode(true);
 	
 	let user = undefined;
@@ -61,6 +60,7 @@ function packagePost(item){
 	html = wrap.innerHTML;
 
 	return {
+		id : id,
 		user : user,
 		date : date,
 		html : html,
@@ -104,7 +104,7 @@ x.forEach(function (item) {
 	//Mark as important if id is already in the storage
 	chrome.storage.local.get("posts", function(data){
 		data = data["posts"];
-		if (typeof data[id] !== 'undefined') {
+		if (data !== undefined && typeof data[id] !== 'undefined') {
 			item.classList.add("important");
 			check.checked = true;
 		}
@@ -116,7 +116,7 @@ x.forEach(function (item) {
 			  chrome.storage.local.get("posts", function(data){
 					data = data["posts"];
 					if (data === undefined) data = {};
-					data[id] = packagePost(item);
+					data[id] = packagePost(item, id);
 					console.log(data);
 					chrome.storage.local.set({"posts" : data}, function() {
 						item.classList.add("important");
