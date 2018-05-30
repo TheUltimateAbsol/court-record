@@ -43,6 +43,45 @@ function updatePostedByChoices(){
 		);
 	});
 }
+
+function outputFactions(){
+	clearElementById("factions");
+	factionsNode = document.getElementById("factions");
+	chrome.storage.local.get("factions", function(result){
+		result = result["factions"];
+		result = (result === undefined ? {} : result);
+		
+		chrome.storage.local.get("users", function(users){
+			users = users["users"];
+			users = (users === undefined ? {} : users);
+
+			let objArray = Object.values(result);
+			let usersArray = Object.values(users);
+			
+			objArray.forEach(function(value){
+				let element = document.createElement("DIV");
+				let heading = document.createElement("h2");
+				heading.innerHTML = value.name;
+				element.appendChild(heading);
+				usersArray.forEach(function(user){
+					if (user.faction !== undefined && user.faction == value.name)
+						element.appendChild(document.createTextNode(user.name));
+				});
+				factionsNode.appendChild(element);
+			}
+			);
+			let element = document.createElement("DIV");
+			let heading = document.createElement("h2");
+			heading.innerHTML = "Undecided";
+			element.appendChild(heading);
+			usersArray.forEach(function(user){
+				if (user.faction === undefined)
+					element.appendChild(document.createTextNode(user.name));
+			});
+			factionsNode.appendChild(element);
+		});		
+	});
+}
 /**
  * @param {String} HTML representing a single element
  * @return {Element}
@@ -98,7 +137,7 @@ function userExists(userName, usersTable){
  * Checks every post in the database for a post from a new user
  * Adds this new user to the users list if not found.
  */
-function update_users(){
+function update_users(callback){
 	chrome.storage.local.get("posts", function(result){
 		result = result["posts"];
 		result = (result === undefined ? {} : result);
@@ -120,6 +159,7 @@ function update_users(){
 			
 			chrome.storage.local.set({"users" : usersTable}, function() {
 		          console.log('Users Table Updated!');
+		          if (callback !== undefined) callback();
 			});
 		});
 	});
@@ -130,17 +170,27 @@ function visibility_switch(id) {
     /* If the ID of allmessages is passed, hide the IDs of the other boxes */
     if(id == 'allmessages') {
     	document.getElementById('allmessages').style.display = "block";
-    	document.getElementById('players').style.display = "none";    	
+    	document.getElementById('player-page').style.display = "none";    	
+    	document.getElementById('factions').style.display = "none";
     }
     
 	 /* If the ID of players is passed, hide the IDs of the other boxes */
-	if(id == 'players') {
-    	document.getElementById('players').style.display = "block";
+	if(id == 'player-page') {
+    	document.getElementById('player-page').style.display = "block";
+    	document.getElementById('allmessages').style.display = "none";
+    	document.getElementById('factions').style.display = "none";
+    }    
+	
+	if(id == 'factions') {
+    	document.getElementById('factions').style.display = "block";
+    	document.getElementById('player-page').style.display = "none";    	
     	document.getElementById('allmessages').style.display = "none";
     }    
 }
 
 function outputUsers(){
+	clearElementById("players");
+
 	chrome.storage.local.get("users", function(result){
 		result = result["users"];
 		result = (result === undefined ? {} : result);
@@ -148,7 +198,31 @@ function outputUsers(){
 		let objArray = Object.values(result);
 		
 		objArray.forEach(function(value){
-			let element = document.createTextNode(value.name);
+			let id = value.name.toUpperCase();
+			
+			let element = document.createElement("DIV");
+			element.setAttribute("class", "player");
+			let nameLabel = document.createElement("h1");
+			nameLabel.innerHTML = value.name;
+			element.appendChild(nameLabel);
+			
+			//add delete button to element
+			let deleteButton = document.createElement("button");
+			deleteButton.innerHTML = "X";
+			deleteButton.setAttribute("class", "delete-button");
+			deleteButton.onclick = function(){
+				document.getElementById("players").removeChild(element);
+				chrome.storage.local.get("users", function(data){
+					data = data["users"];
+					if (data === undefined) data = {};
+					data[id] = undefined;
+					chrome.storage.local.set({"users" : data}, function() {
+				          console.log(id + ' removed from storage!');
+					});
+		    });
+			}
+			element.appendChild(deleteButton);
+			
 			document.getElementById("players").appendChild(element);
 		}
 		);
@@ -255,14 +329,19 @@ document.getElementById("posted-by").onchange = function(){
 		postedBy = undefined;
 	outputPosts();
 }
+
+document.getElementById("import-players").onclick = function(){
+	update_users(function() {outputUsers();});
+}
 document.getElementById("messages-tab").onclick = function(){visibility_switch("allmessages")};
-document.getElementById("players-tab").onclick = function(){visibility_switch("players")};
+document.getElementById("players-tab").onclick = function(){visibility_switch("player-page")};
+document.getElementById("factions-tab").onclick = function(){visibility_switch("factions")};
 
 //SET DEFAULTS
 chosenRadioFilter = allFilter;
 updatePostedByChoices();
 
-update_users();
 chrome.storage.local.get(function(result){console.log(result)});
 outputPosts();
 outputUsers();
+outputFactions();

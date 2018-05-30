@@ -51,3 +51,18 @@ body{
 .message-item:hover .delete-button{
 	display: block;
 }
+
+.player {
+	padding: 20px 40px;
+	display: block;
+	position: relative;
+}
+
+.player:hover .delete-button{
+	display: block;
+}
+
+
+.player h1{
+	font-size: 20px;
+}

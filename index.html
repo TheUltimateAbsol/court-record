@@ -16,12 +16,16 @@
 		<input type="radio" name="postType" value="qt" id="type-qt"><label for="type-qt" >QuickTopic only</label>
 	</form>
 	<select name="posted-by" form="queryParameters" id="posted-by"></select>
-	<a href="#" id="messages-tab">Messages</a> | <a href="#" id="players-tab">Users</a>
+	<a href="#" id="messages-tab">Messages</a> | <a href="#" id="players-tab">Users</a>| <a href="#" id="factions-tab">Factions</a>
   </div>
   <div id="content">
   	<div id="allmessages"></div>
-  	<div id="players" style="display:none;"></div>
-  	
+  	<div id="player-page" style="display:none;">
+  		<button id="import-players">Import Players from Posts</button>
+  		<button id="add-player">Add New Player</button>
+  		<div id="players"></div>
+  	</div>
+  	<div id="factions" style="display:none;"></div>
   </div>
 
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/highslide/highslide-styles.css"/>
