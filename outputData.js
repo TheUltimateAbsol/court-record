@@ -1,5 +1,5 @@
 //chrome.storage.local.clear();
-
+let VERSION = 1.2;
 let chosenRadioFilter = undefined;
 let postedBy = undefined;
 
@@ -165,27 +165,20 @@ function update_users(callback){
 	});
 }
 
-function visibility_switch(id) {
-
-    /* If the ID of allmessages is passed, hide the IDs of the other boxes */
-    if(id == 'allmessages') {
-    	document.getElementById('allmessages').style.display = "block";
-    	document.getElementById('player-page').style.display = "none";    	
-    	document.getElementById('factions').style.display = "none";
-    }
-    
-	 /* If the ID of players is passed, hide the IDs of the other boxes */
-	if(id == 'player-page') {
-    	document.getElementById('player-page').style.display = "block";
-    	document.getElementById('allmessages').style.display = "none";
-    	document.getElementById('factions').style.display = "none";
-    }    
+function visibility_switch(button_id, content_id) {	
+	let tabs = document.getElementsByClassName("tab");
+	for (let i = 0; i < tabs.length; i++){
+		tabs[i].classList.remove("active");
+	}
 	
-	if(id == 'factions') {
-    	document.getElementById('factions').style.display = "block";
-    	document.getElementById('player-page').style.display = "none";    	
-    	document.getElementById('allmessages').style.display = "none";
-    }    
+	document.getElementById(button_id).classList.add("active");
+	
+	tabs = document.getElementsByClassName("tabContent");
+	for (let i = 0; i < tabs.length; i++){
+		tabs[i].style.display = "none";
+	}
+	
+	document.getElementById(content_id).style.display = "block";
 }
 
 function outputUsers(){
@@ -230,7 +223,7 @@ function outputUsers(){
 }
 
 function outputPosts(){
-	clearElementById("allmessages");
+	clearElementById("posts");
 	
 	chrome.storage.local.get("posts", function(result){
 		result = result["posts"];
@@ -281,11 +274,11 @@ function outputPosts(){
 				element.setAttribute("class", "message-item");
 				
 				//add delete button to element
-				let deleteButton = document.createElement("button");
+				/* let deleteButton = document.createElement("button");
 				deleteButton.innerHTML = "X";
 				deleteButton.setAttribute("class", "delete-button");
 				deleteButton.onclick = function(){
-					document.getElementById("allmessages").removeChild(element);
+					document.getElementById("posts").removeChild(element);
 					chrome.storage.local.get("posts", function(data){
 						data = data["posts"];
 						if (data === undefined) data = {};
@@ -296,16 +289,254 @@ function outputPosts(){
 						});
 			    });
 				}
-				element.appendChild(deleteButton);
+				element.appendChild(deleteButton); */
 				
-				document.getElementById("allmessages").appendChild(element);
+				document.getElementById("posts").appendChild(element);
 			});
 		});
 		
 	});
 }
 
+function isValidURL(string){
+	let urlPattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+			  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|'+ // domain name
+			  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+			  '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+			  '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+			  '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+	
+	let beachSnippet = "pokebeach.com/forums/threads/";
+	let match = urlPattern.test(string);
+	
+	console.log(string.includes(beachSnippet));
+	
+	if (match)
+		if (string.includes(beachSnippet))
+			return true;
+	return false;
+}
 
+
+
+//SCRIPTS IMPORTED FROM POPUP.JS
+
+function getFile(filename, callback)
+{ oxmlhttp = null;
+  try
+    { oxmlhttp = new XMLHttpRequest();
+      oxmlhttp.overrideMimeType("text/html");
+    }
+  catch(e)
+    { 
+  	return null
+    }
+  if(!oxmlhttp) return null;
+  try
+    { oxmlhttp.open("GET",filename,true);
+    	oxmlhttp.send(null);
+    }
+  catch(e)
+    { return null;
+    }
+  oxmlhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+      	var parser = new DOMParser();
+      	var xmlDoc = parser.parseFromString(this.responseText, "text/html");''
+      	callback(xmlDoc);
+      }
+	  };
+}
+
+function removeAllButClass(root, excludeClass){
+	if (root.classList != undefined && root.classList.contains(excludeClass)) return false;
+	
+	let children = root.childNodes;
+	if (children.length == 0) return true;
+	
+	for (let i = children.length - 1; i >= 0; i--){
+		if(removeAllButClass(children[i], excludeClass))
+			root.removeChild(children[i]);
+	}
+}
+
+/**
+ * getBeachNumPages
+ * Counts the number of pages on a PokeBeach thread
+ * @param url - the url of the site
+ * @param callback- the action taken after the number of pages is received
+ * 					-has integer parameter with number of pages
+ * @returns the number of pages on the thread (an integer)
+ */
+function getBeachNumPages(url, callback){
+	getFile(url, function(site){
+		var pageHeader = site.getElementsByClassName("pageNavHeader");
+		var re = /Page \d+ of (\d+)/i;
+
+		let numPages = 1;
+		
+		if (pageHeader.length === 0)
+			numPages = 1;
+		else {
+			pageHeader = pageHeader[0];
+			rawString = pageHeader.innerHTML;
+			numPages = parseInt(rawString.match(re)[1]);
+		}
+		
+		callback(numPages);
+	});
+}
+
+
+/**
+ * prompUserForSite
+ * Gets a valid PokeBeach or QuickTopic URL from the user, then passes it into the callback function
+ * @param callback a function that is ran after the input is received
+ * @returns null
+ */
+function promptUserForSite(callback){
+	document.getElementById("popup").style.display = "flex";
+	document.getElementById("url-entry-popup-form").style.display = "block";
+	
+	document.getElementById("url-entry-popup-form").onsubmit = function() {
+		if (isValidURL(document.getElementById("url-entry-popup-text").value))
+		{
+			console.log("Good URL")
+			document.getElementById("popup").style.display = "none";
+			document.getElementById("url-entry-popup-form").style.display = "none";
+			callback(document.getElementById("url-entry-popup-text").value);
+		}
+		else
+		{
+			console.log("Bad URL");
+			alert("Not a valid PokeBeach or QuickTopic URL");
+		}
+	}
+}
+
+/**
+ * Downloads all new posts from saved urls
+ */
+function downloadPosts(){
+	chrome.storage.local.get("urls", function(result){
+		result = result["urls"];
+		result = (result === undefined ? {} : result);
+		
+		//Variables to define:
+		let pageTotal = 0;
+		let loadingBar = document.getElementById("loadingBar");
+		
+		//Iterator function
+		let currentURL = 0;
+		function getNextURL(){
+			let url = Object.values(result)[currentURL];
+			if (url) url = url["url"]; //Get the real value if not null.
+			currentURL = currentURL + 1;
+			
+			return url;
+		}
+		
+		//Count Num Posts for each URL
+		function countNumPosts(callback){
+			let url = getNextURL();
+			if (!url)
+			{
+				currentURL = 0;
+				callback();
+			}
+			console.log(url);
+			
+			getBeachNumPages(url, function(numPages){
+				pageTotal = pageTotal + numPages;
+				countNumPosts(callback);
+			})
+		}
+		
+		countNumPosts(function(){
+			loadingBar.max = pageTotal;
+			loadingBar.value = 0;
+			document.getElementById("loadingTitle").innerHTML = "Downloaded 0 of " + pageTotal;
+		})
+	});
+	/*
+	  let start = document.getElementById("start").value;
+	  let end = document.getElementById("end").value;
+	  
+	  //Switch out display elements
+	  let progress = document.getElementById("master-load");
+	  progress.style.display = "block";
+	  progress.max = end - start + 1;
+	  this.style.display = "none";
+	  progress.onchange = function(){
+		  console.log("HELLO WORLD");
+		if (progress.position === 1)
+			console.log("DONE");
+	  }
+	  
+	  for (let i = start; i <= end; i++ ){
+		  let site = getFile(url+"page-" + i, function(site){
+			  let x = Array.from(site.getElementsByClassName("message"));
+			  let y = Array.from(site.getElementsByClassName("deleted"));
+			  let z = Array.from(site.getElementsByClassName("quickReply"));
+			  x = x.filter(function(e){return this.indexOf(e)<0;},y);
+			  x = x.filter(function(e){return this.indexOf(e)<0;},z);
+			  
+			  let subProgress = document.createElement("progress");
+			  subProgress.classList.add("minorProgress");
+			  document.getElementById("sub-load").appendChild(subProgress);
+			  
+			  subProgress.max = x.length;
+			  
+			  x.forEach(function (item) {
+			  	let id = item.id;
+			  	
+				chrome.storage.local.set({[id] : packagePost(item, id)}, function() {
+					//TODO when message is recorded
+					subProgress.value++;
+					if (subProgress.position === 1)
+					{
+						document.getElementById("master-load").value++;
+						if(document.getElementById("master-load").position === 1) onFinish();
+					}
+						
+					//console.log (id + " saved!")
+				});
+			  })
+			  
+			  
+		  });*/
+}
+/**
+ * Checks to see if any urls have been logged so far. 
+ * If none, prompts user for site, then downloads all posts
+ * @returns
+ */
+function initialSiteCheck(){
+	chrome.storage.local.get("urls", function(result){
+		result = result["urls"];
+		result = (result === undefined ? {} : result);
+		
+		//Prompt if empty
+		if (Object.keys(result).length === 0 && result.constructor === Object){
+			promptUserForSite(function(url){
+				//Trim url
+				url = url.substr(0, url.lastIndexOf('/') + 1);
+				//Save url
+				result[url] = {url:url, current: null, version:VERSION};
+				chrome.storage.local.set({"urls" : result}, function() {
+					//Download Posts
+					//TODO
+					//Tell whether a url is qt or pokebeach
+					//Use popupJs to download all posts off of the provided URL
+					
+					downloadPosts();
+				});
+			})
+			}
+		}
+)
+	
+}
 
 //Set Radio Buttons
 document.getElementById("type-all"). onclick = function(){
@@ -333,15 +564,27 @@ document.getElementById("posted-by").onchange = function(){
 document.getElementById("import-players").onclick = function(){
 	update_users(function() {outputUsers();});
 }
-document.getElementById("messages-tab").onclick = function(){visibility_switch("allmessages")};
-document.getElementById("players-tab").onclick = function(){visibility_switch("player-page")};
-document.getElementById("factions-tab").onclick = function(){visibility_switch("factions")};
+
+document.getElementById("messages-tab").onclick = function(){visibility_switch("messages-tab", "messages-page")};
+document.getElementById("players-tab").onclick = function(){visibility_switch("players-tab", "player-page")};
+document.getElementById("factions-tab").onclick = function(){visibility_switch("factions-tab", "factions")};
+document.getElementById("settings-tab").onclick = function(){visibility_switch("settings-tab", "settings-page")};
+
+document.getElementById("clear-button").onclick = function(){chrome.storage.local.clear(function(){
+	outputPosts();
+	outputUsers();
+	outputFactions();
+});};
+
 
 //SET DEFAULTS
 chosenRadioFilter = allFilter;
 updatePostedByChoices();
 
+visibility_switch("messages-tab", "messages-page");
 chrome.storage.local.get(function(result){console.log(result)});
 outputPosts();
 outputUsers();
 outputFactions();
+initialSiteCheck();
+downloadPosts();

@@ -8,26 +8,47 @@
   </head>
   <body>
   
-  <div id="optionsBar" style="float:left; height:100%;">
-  	<form class="radioOptions" id="queryParameters">
-  		<h3>Type of Post</h3>
-		<input type="radio" name="postType" value="all" id="type-all" checked><label for="type-all">All</label>
-		<input type="radio" name="postType" value="pokebeach" id="type-pokebeach"><label for="type-pokebeach" >PokeBeach only</label>
-		<input type="radio" name="postType" value="qt" id="type-qt"><label for="type-qt" >QuickTopic only</label>
+ <div class="tabs">	
+	<button href="#" id="messages-tab" class="tab">Messages</button>
+	<button href="#" id="players-tab" class="tab">Users</button>
+	<button href="#" id="factions-tab" class="tab">Factions</button>
+	<button href="#" id="settings-tab" class="tab">Settings</button>
+</div>
+  <div id="popup" style="display:none">
+  	<form id="url-entry-popup-form" action="#">
+  		<h1 class="block">First, Enter the URL of the mafia thread to track</h1>
+  		<input name="url" type="url" class="block" id="url-entry-popup-text"/>
+  		<input type="submit" value = "Submit" form="url-entry-popup-form" class="block" id="url-entry-popup-submit"/>
 	</form>
-	<select name="posted-by" form="queryParameters" id="posted-by"></select>
-	<a href="#" id="messages-tab">Messages</a> | <a href="#" id="players-tab">Users</a>| <a href="#" id="factions-tab">Factions</a>
-  </div>
-  <div id="content">
-  	<div id="allmessages"></div>
-  	<div id="player-page" style="display:none;">
-  		<button id="import-players">Import Players from Posts</button>
-  		<button id="add-player">Add New Player</button>
-  		<div id="players"></div>
-  	</div>
-  	<div id="factions" style="display:none;"></div>
   </div>
 
+  <div id="content">
+  	<div id="messages-page" class="tabContent">
+  	  <div id="optionsBar" style="float:left;">
+	  	<form class="radioOptions" id="queryParameters">
+	  		<h3>Type of Post</h3>
+			<input type="radio" name="postType" value="all" id="type-all" checked><label for="type-all">All</label>
+			<input type="radio" name="postType" value="pokebeach" id="type-pokebeach"><label for="type-pokebeach" >PokeBeach only</label>
+			<input type="radio" name="postType" value="qt" id="type-qt"><label for="type-qt" >QuickTopic only</label>
+		</form>
+		<select name="posted-by" form="queryParameters" id="posted-by"></select>
+		<div id="loadingPanel">
+			<label id="loadingTitle">Preparing Download</label>
+			<progress id="loadingBar"></progress>
+		</div>
+	  </div>
+	  <div id="posts" class="contentPage" ></div>
+	</div>
+  	<div id="player-page" style="display:none;" class="tabContent contentPage">
+		<div class="reminder">(Sorted by post timing, earliest to latest)</div>
+  		<button id="import-players">Update Players from Posts</button>
+  		<div id="players"></div>
+  	</div>
+  	<div id="factions" class="tabContent contentPage" style="display:none;"></div>
+  	<div id="settings-page" class="tabContent contentPage" style="display:none;">
+  		<button id="clear-button">Clear All Data</button></div>
+  </div>
+  
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/highslide/highslide-styles.css"/>
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/highslide/card-highslide.css"/>
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/tooltipster.css"/>

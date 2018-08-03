@@ -1,14 +1,17 @@
 #optionsBar {
-    height: 100%; /* Full-height: remove this if you want "auto" height */
     width: 15%; /* Set the width of the sidebar */
     position: fixed; /* Fixed Sidebar (stay in place on scroll) */
     z-index: 1; /* Stay on top */
-    top: 0; /* Stay at the top */
     left: 0;
     background-color: white; /* Black */
     overflow-x: hidden; /* Disable horizontal scroll */
-    padding-top: 20px;
     border-right: 4px dotted blue;
+    top:60px;
+    bottom:0;
+}
+
+#messages-page {
+	margin-left: 15% /*to account for sidebar*/
 }
 
 .radioOptions input[type=radio],
@@ -19,10 +22,16 @@ input.radio {
 }
 
 #content{
-	height: 100%;  Full-height: remove this if you want "auto" height */
-    width: 85%; /* Set the width of the sidebar */
-    padding-top: 20px;
-    margin-left: 15%;
+	margin-top: 60px;
+	min-height : 300px;
+    width: 100%; /* Set the width of the sidebar */
+    padding: 0px 2px;
+    background-color: rgba(0, 0, 0, 0)
+}
+
+#content .contentPage{
+	min-height : 300px;
+    width: 100%; /* Set the width of the sidebar */
     border-radius: 20px 20px;
     box-shadow: 0 1px 4px #333;
     background: white;
@@ -33,6 +42,8 @@ input.radio {
 body{
 	background: none !important;
 	box-shadow: none;
+	padding: 0;
+	overflow-x: hidden;
 }
 
 .delete-button {
@@ -44,6 +55,14 @@ body{
 	display: none;
 }
 
+.edit-button {
+	height: 20px;
+	position: absolute;
+	right: 10px;
+	bottom: 20%;
+	display: none;
+}
+
 .message-item {
 	position: relative;
 }
@@ -51,9 +70,12 @@ body{
 .message-item:hover .delete-button{
 	display: block;
 }
+.message-item:hover .edit-button{
+	display: block;
+}
 
 .player {
-	padding: 20px 40px;
+	padding: 5px 40px;
 	display: block;
 	position: relative;
 }
@@ -63,6 +85,130 @@ body{
 }
 
 
-.player h1{
+.player h2{
+	font-size: 12px;
+}
+
+.edit-panel input[type=radio],
+input.radio {
+  float: left;
+  clear: none;
+  margin: 2px 0 0 2px;
+}
+.edit-panel{
+	position: absolute;
+	right: 10px;
+	bottom: 20%;
+	display: none;
+	background-color: white;
+	padding: 5px;
+	border-radius: 10px 10px;
+	border-color: #093377;
+	border-style: solid;
+	border-width: thin;
+}
+
+.premium-member{
+	background-image: linear-gradient(to left, rgb(255, 255, 255) 70%, rgb(255, 253, 221) 75%, rgb(255, 60, 16) 100%) !important;
+}
+
+.unknown-member{
+	background-image: linear-gradient(to left, rgb(255, 255, 255) 70%, rgb(201, 214, 232) 100%) !important;
+}
+
+#import-players{
+	margin: 0 auto;
+	display: block;
+	font-size: large;
+}
+
+#players h1{
+	font-size: 25pt;
+	font-family: Verdana;
+	font-weight: bold;
+}
+
+.reminder {
+	color: #bcbcbc;
+	font-style: italic;
+	text-align: center;
+	padding: 5px;
+}
+
+.tabs {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 0;
+    z-index: 100;
+    height: 60px;
+}
+
+.tabs button {
+    background-color: inherit;
+    border: .1;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    display: inline;
+    height: 100%; 
+    width: 20%
+}
+
+/* Change background color of buttons on hover */
+.tabs button:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tabs button.active {
+    background-color: #ccc;
+}
+
+#popup{
+	position: absolute; 
+	z-index:101;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left:0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, .5)
+	  
+}
+
+#popup form{
+	position: absolute;
+	text-align:center;
+}
+
+#popup form .block{
+	margin: 10px auto;
+	padding: 5px;
+}
+
+#popup form h1{
+	color: white;
 	font-size: 20px;
+}
+
+#loadingPanel{
+	position: absolute;
+	display: block;
+	bottom:0;
+	left:0;
+	right:0;
+	text-align: center;
+	margin: 10px;
+}
+
+#loadingBar{
+	width: 100%;
 }
