@@ -2,8 +2,6 @@
 <html>
   <head>
     <meta charset="UTF-8">
-   	<link rel="stylesheet" type="text/css" href="http://www.pokebeach.com/forums/css.php?css=attachment_editor,bb_code,breadcrumb_top,editor_ui,inline_mod,message,message_user_info,moderator_bar,panel_scroller,quick_reply,share_page,thread_view,thread_view_extra,threadmarks,waindigo_trophy_icons_trophies&style=2&dir=LTR&d=1526365530">
-   	<link rel="stylesheet" type="text/css" href="http://www.pokebeach.com/forums/css.php?css=xenforo,form,public&style=2&dir=LTR&d=1526365530">
     <title>Court Record</title>
   </head>
   <body>
@@ -32,9 +30,12 @@
 			<input type="radio" name="postType" value="qt" id="type-qt"><label for="type-qt" >QuickTopic only</label>
 		</form>
 		<select name="posted-by" form="queryParameters" id="posted-by"></select>
-		<div id="loadingPanel">
-			<label id="loadingTitle">Preparing Download</label>
-			<progress id="loadingBar"></progress>
+		<div id="bottomOptions">
+			<button id="loadingButton">Fetch New Posts</button>
+			<div id="loadingPanel" style="display:none;">
+				<label id="loadingTitle">Preparing Download</label>
+				<progress id="loadingBar"></progress>
+			</div>
 		</div>
 	  </div>
 	  <div id="posts" class="contentPage" ></div>
@@ -49,6 +50,9 @@
   		<button id="clear-button">Clear All Data</button></div>
   </div>
   
+
+  <link rel="stylesheet" type="text/css" href="http://www.pokebeach.com/forums/css.php?css=attachment_editor,bb_code,breadcrumb_top,editor_ui,inline_mod,message,message_user_info,moderator_bar,panel_scroller,quick_reply,share_page,thread_view,thread_view_extra,threadmarks,waindigo_trophy_icons_trophies&style=2&dir=LTR&d=1526365530">
+  <link rel="stylesheet" type="text/css" href="http://www.pokebeach.com/forums/css.php?css=xenforo,form,public&style=2&dir=LTR&d=1526365530">
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/highslide/highslide-styles.css"/>
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/highslide/card-highslide.css"/>
   <link rel="stylesheet" property="stylesheet" type="text/css" href="http://www.pokebeach.com/wp-content/themes/pokebeach/css/tooltipster.css"/>
@@ -64,7 +68,8 @@
   <link rel="stylesheet" property="stylesheet" type="text/css" href="https://www.quicktopic.com/css/qt-topic.css"/>
   <link rel="stylesheet" property="stylesheet" type="text/css" href="https://www.quicktopic.com/css/vtip.css"/>
   
+    <script src="outputData.js"></script>
   <link rel="stylesheet" type="text/css" href="style-query.css"/>
-  <script src="outputData.js"></script>
+  
   </body>
 </html>

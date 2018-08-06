@@ -199,15 +199,17 @@ input.radio {
 	font-size: 20px;
 }
 
-#loadingPanel{
+#bottomOptions{
 	position: absolute;
 	display: block;
 	bottom:0;
 	left:0;
 	right:0;
 	text-align: center;
-	margin: 10px;
+	padding: 10px;
+	border-top: 2px solid #e0e0e0;
 }
+
 
 #loadingBar{
 	width: 100%;

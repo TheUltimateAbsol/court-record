@@ -159,7 +159,7 @@ function update_users(callback){
 			
 			chrome.storage.local.set({"users" : usersTable}, function() {
 		          console.log('Users Table Updated!');
-		          if (callback !== undefined) callback();
+		          if (callback !== undefined) return callback();
 			});
 		});
 	});
@@ -348,6 +348,42 @@ function getFile(filename, callback)
 	  };
 }
 
+/**
+ * Does the exact same thing as getFile, but only allows the parsing of one page at a time.
+ * If called more than once, xmlDoc will be overwritten.
+ * Therefore, significant amounts of ram will NOT be used.
+ * @param filename
+ * @param callback
+ * @returns
+ */
+let CURRENT_DOC = document;
+function sequentialGetFile(filename, callback)
+{ oxmlhttp = null;
+try
+  { oxmlhttp = new XMLHttpRequest();
+    oxmlhttp.overrideMimeType("text/html");
+  }
+catch(e)
+  { 
+	return null
+  }
+if(!oxmlhttp) return null;
+try
+  { oxmlhttp.open("GET",filename,true);
+  	oxmlhttp.send(null);
+  }
+catch(e)
+  { return null;
+  }
+oxmlhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+    	var parser = new DOMParser();
+    	CURRENT_DOC = parser.parseFromString(this.responseText, "text/html");''
+    	callback(CURRENT_DOC);
+    }
+	  };
+}
+
 function removeAllButClass(root, excludeClass){
 	if (root.classList != undefined && root.classList.contains(excludeClass)) return false;
 	
@@ -414,8 +450,100 @@ function promptUserForSite(callback){
 	}
 }
 
+function removeElementsByClass(root, className){
+    var elements = root.getElementsByClassName(className);
+    while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
+
+//TODO: This only works for recent dates. Use the more updated version from the other extension.
+function parseDate(dateString){
+	let atPos = dateString.indexOf("at");
+	let date = dateString.substring(0, atPos);
+	let time = dateString.substring(atPos + 2);
+	return Date.parse(date + time) / 1000;
+}
+
+function packagePost(item, id){
+	var node = item.cloneNode(true);
+	
+	let user = node.getAttribute("data-author");
+	let date = 123;
+	let html = undefined;
+	
+	let pc = node.getElementsByClassName("primaryContent")[0];
+	if (pc){
+		let editDate = pc.getElementsByClassName("editDate")[0];
+		let signature = pc.getElementsByClassName("signature")[0];
+		let messageMeta = pc.getElementsByClassName("messageMeta")[0];
+		
+		//Set date
+		if(messageMeta) {
+//			console.log("message found");
+			let privateControls = messageMeta.getElementsByClassName("privateControls")[0];
+			if (privateControls){
+//				console.log("privateControls found");
+				let mutedItem = privateControls.getElementsByClassName("muted")[0];
+				if (mutedItem){
+//					console.log("mutedItem found");
+					let datePermalink = mutedItem.getElementsByClassName("datePermalink")[0];
+					if (datePermalink){
+//						console.log("datePermalink found");
+						let dateTime = datePermalink.getElementsByClassName("DateTime")[0];
+						if (dateTime){
+//							console.log("dateTime found");
+							let dateString = dateTime.getAttribute("title");
+							if (dateString === null)
+								dateString = dateTime.getAttribute("data-datestring") + " at ";
+									+ dateTime.getAttribute("data-timestring");
+							
+							date = parseDate(dateString);
+						}
+					}
+				}
+			}
+		}
+		
+		if(editDate) pc.removeChild(editDate);
+		if(signature) pc.removeChild(signature);
+		if(messageMeta) pc.removeChild(messageMeta);
+	}
+	
+	//Expand image URLs
+	(Array.from(node.getElementsByTagName("img"))).forEach(function (image){
+		let absolute = image.src;
+		image.setAttribute("src", absolute);
+	});
+	
+	//Strip links from User info
+	let userInfo = node.getElementsByClassName("messageUserInfo")[0];
+	if (userInfo){
+		(Array.from(userInfo.getElementsByTagName("a"))).forEach(function (link){
+			link.removeAttribute("href");
+		});
+	}
+	
+	//Remove New indicator
+	removeElementsByClass(node, "newIndicator");
+	
+	let wrap = document.createElement('div');
+	wrap.appendChild(node);
+	html = wrap.innerHTML;
+
+	return {
+		id : id,
+		user : user,
+		date : date,
+		html : html,
+		type : "pokebeach"
+	};
+}
+
+
 /**
  * Downloads all new posts from saved urls
+ * TODO: Download only pages that have not been fully downloaded yet.
  */
 function downloadPosts(){
 	chrome.storage.local.get("urls", function(result){
@@ -425,12 +553,13 @@ function downloadPosts(){
 		//Variables to define:
 		let pageTotal = 0;
 		let loadingBar = document.getElementById("loadingBar");
+		let toDownload = {}; //Stores num to download in key-value pairs
+		let numDownloaded = 0;
 		
 		//Iterator function
 		let currentURL = 0;
 		function getNextURL(){
 			let url = Object.values(result)[currentURL];
-			if (url) url = url["url"]; //Get the real value if not null.
 			currentURL = currentURL + 1;
 			
 			return url;
@@ -442,69 +571,110 @@ function downloadPosts(){
 			if (!url)
 			{
 				currentURL = 0;
-				callback();
+				return callback();
 			}
-			console.log(url);
 			
-			getBeachNumPages(url, function(numPages){
-				pageTotal = pageTotal + numPages;
+			let currentPage = (!url["currentPage"] ? 1 : url["currentPage"]); //Default page = 1;
+			
+			getBeachNumPages(url["url"], function(numPages){
+				let numUnread = numPages - currentPage + 1; //+1 because we need to read the current page too
+				pageTotal = pageTotal + numUnread;
+				toDownload[url["url"]] = numUnread;
 				countNumPosts(callback);
 			})
 		}
 		
+		
+		//NOTE:
+		//YOU NEED TO QUEUE ALL PAGES SEQUENTIALLY, AND FIGURE OUT HOW TO FREE DATA
+		//ELSE, 40 PAGES WILL OPEN AT THE SAME TIME AND BREAK THE SYSTEM.
+		
+		function downloadEachURL(callback){
+
+			let url = getNextURL();
+			console.log("URL Received");
+			
+			if (!url)
+			{
+				console.log("End");
+				return callback();
+			}
+			
+			let currentPage = (!url["currentPage"] ? 1 : url["currentPage"]); //Default page = 1;
+			let endPage = toDownload[url["url"]] + currentPage - 1;
+			
+			function nextPage(){
+				let toReturn = currentPage;
+				currentPage++;
+				
+				return toReturn;
+			}
+			
+			function readPage(){
+				let pageNumber = nextPage();
+				
+				console.log (pageNumber + " " + endPage);
+				if (pageNumber > endPage){
+					//callback
+					return downloadEachURL(callback);
+				}
+				
+				console.log("Downloading " + url["url"]+"page-" + pageNumber);
+				let site = sequentialGetFile(url["url"]+"page-" + pageNumber, function(site){
+					let x = Array.from(site.getElementsByClassName("message"));
+					let y = Array.from(site.getElementsByClassName("deleted"));
+					let z = Array.from(site.getElementsByClassName("quickReply"));
+					x = x.filter(function(e){return this.indexOf(e)<0;},y);
+					x = x.filter(function(e){return this.indexOf(e)<0;},z);
+					let numToSave = x.length;
+					let numSaved = 0;
+				  
+					chrome.storage.local.get("posts", function(data){
+						data = data["posts"];
+						if (data === undefined) data = {};
+						x.forEach(function (item) {
+							let id = item.id;
+							data[id] = (data[id] === undefined ? packagePost(item, id) : data[id]);
+						});
+						
+						result[url["url"]]["currentPage"] = pageNumber;
+						
+						//Save the updated posts list
+						chrome.storage.local.set({"posts" : data}, function() {
+							//Save the act of reading the page
+							chrome.storage.local.set({"urls" : result}, function(){
+								console.log(result);
+								loadingBar.value = loadingBar.value + 1;
+								numDownloaded++;
+								document.getElementById("loadingTitle").innerHTML = "Downloaded " + numDownloaded + " of " + pageTotal;
+								readPage();
+							})
+						});
+					});
+				  });
+			  	}
+			
+			readPage();
+		}
+		
+		document.getElementById("loadingPanel").style.display = "block";
+		document.getElementById("loadingButton").style.display = "none";
+		document.getElementById("loadingTitle").innerHTML = "Preparing Download";
 		countNumPosts(function(){
 			loadingBar.max = pageTotal;
 			loadingBar.value = 0;
 			document.getElementById("loadingTitle").innerHTML = "Downloaded 0 of " + pageTotal;
+			downloadEachURL(function() {
+				//Reset Loading Panel
+				document.getElementById("loadingPanel").style.display = "none";
+				loadingBar.max = "";
+				loadingBar.value = "";
+				document.getElementById("loadingButton").style.display = "inline";
+				
+				outputPosts();
+			});
 		})
 	});
-	/*
-	  let start = document.getElementById("start").value;
-	  let end = document.getElementById("end").value;
-	  
-	  //Switch out display elements
-	  let progress = document.getElementById("master-load");
-	  progress.style.display = "block";
-	  progress.max = end - start + 1;
-	  this.style.display = "none";
-	  progress.onchange = function(){
-		  console.log("HELLO WORLD");
-		if (progress.position === 1)
-			console.log("DONE");
-	  }
-	  
-	  for (let i = start; i <= end; i++ ){
-		  let site = getFile(url+"page-" + i, function(site){
-			  let x = Array.from(site.getElementsByClassName("message"));
-			  let y = Array.from(site.getElementsByClassName("deleted"));
-			  let z = Array.from(site.getElementsByClassName("quickReply"));
-			  x = x.filter(function(e){return this.indexOf(e)<0;},y);
-			  x = x.filter(function(e){return this.indexOf(e)<0;},z);
-			  
-			  let subProgress = document.createElement("progress");
-			  subProgress.classList.add("minorProgress");
-			  document.getElementById("sub-load").appendChild(subProgress);
-			  
-			  subProgress.max = x.length;
-			  
-			  x.forEach(function (item) {
-			  	let id = item.id;
-			  	
-				chrome.storage.local.set({[id] : packagePost(item, id)}, function() {
-					//TODO when message is recorded
-					subProgress.value++;
-					if (subProgress.position === 1)
-					{
-						document.getElementById("master-load").value++;
-						if(document.getElementById("master-load").position === 1) onFinish();
-					}
-						
-					//console.log (id + " saved!")
-				});
-			  })
-			  
-			  
-		  });*/
 }
 /**
  * Checks to see if any urls have been logged so far. 
@@ -522,13 +692,10 @@ function initialSiteCheck(){
 				//Trim url
 				url = url.substr(0, url.lastIndexOf('/') + 1);
 				//Save url
-				result[url] = {url:url, current: null, version:VERSION};
+				result[url] = {url:url, currentPage: null, version:VERSION};
 				chrome.storage.local.set({"urls" : result}, function() {
 					//Download Posts
-					//TODO
-					//Tell whether a url is qt or pokebeach
-					//Use popupJs to download all posts off of the provided URL
-					
+					//alert("hello world");
 					downloadPosts();
 				});
 			})
@@ -576,6 +743,8 @@ document.getElementById("clear-button").onclick = function(){chrome.storage.loca
 	outputFactions();
 });};
 
+document.getElementById("loadingButton").onclick = downloadPosts;
+
 
 //SET DEFAULTS
 chosenRadioFilter = allFilter;
@@ -587,4 +756,3 @@ outputPosts();
 outputUsers();
 outputFactions();
 initialSiteCheck();
-downloadPosts();
