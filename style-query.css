@@ -10,6 +10,10 @@
     bottom:0;
 }
 
+.important .primaryContent{
+	background-image: linear-gradient(to right, rgb(255, 253, 221) 70%, rgb(255, 60, 16) 100%) !important;
+}
+
 #messages-page {
 	margin-left: 15% /*to account for sidebar*/
 }
@@ -36,6 +40,13 @@ input.radio {
     box-shadow: 0 1px 4px #333;
     background: white;
     padding: 20px 20px;
+}
+
+#post-popup{
+    width: 100%; /* Set the width of the sidebar */
+    margin: 10%;
+    overflow-y: auto;
+    height: 100%
 }
 
 
@@ -89,6 +100,21 @@ body{
 	font-size: 12px;
 }
 
+.url {
+	padding: 5px 40px;
+	display: block;
+	position: relative;
+}
+
+#url-list .delete-button{
+	display: block;
+}
+
+
+.url h1{
+	font-size: 25px;
+}
+
 .edit-panel input[type=radio],
 input.radio {
   float: left;
@@ -116,7 +142,7 @@ input.radio {
 	background-image: linear-gradient(to left, rgb(255, 255, 255) 70%, rgb(201, 214, 232) 100%) !important;
 }
 
-#import-players{
+.page-button{
 	margin: 0 auto;
 	display: block;
 	font-size: large;
@@ -126,6 +152,15 @@ input.radio {
 	font-size: 25pt;
 	font-family: Verdana;
 	font-weight: bold;
+}
+
+#exit-popup img{
+	position: absolute;
+	height: 50px;
+	width: 50px;
+	right: 15px;
+	top: 15px;
+	 filter: brightness(200%);
 }
 
 .reminder {
@@ -171,7 +206,7 @@ input.radio {
 }
 
 #popup{
-	position: absolute; 
+	position: fixed; 
 	z-index:101;
 	width: 100%;
 	height: 100%;
@@ -179,24 +214,38 @@ input.radio {
 	left:0;
 	display: flex;
 	justify-content: center;
-	align-items: center;
-	background-color: rgba(0, 0, 0, .5)
-	  
+	align-items: center; 
 }
 
-#popup form{
+#popup-background {
+	position: absolute; 
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left:0;
+	background-color: rgba(0, 0, 0, .5);
+	z-index: -1;
+}
+
+.popup{
 	position: absolute;
 	text-align:center;
 }
 
-#popup form .block{
+.popup .block{
 	margin: 10px auto;
 	padding: 5px;
 }
 
-#popup form h1{
+.popup h1{
 	color: white;
 	font-size: 20px;
+}
+
+.bigButton {
+	font-size: 20px;
+	padding: 5px;
+	margin: 5px;
 }
 
 #bottomOptions{
@@ -207,10 +256,92 @@ input.radio {
 	right:0;
 	text-align: center;
 	padding: 10px;
-	border-top: 2px solid #e0e0e0;
+	border-top: 2px double #e0e0e0;
 }
 
 
 #loadingBar{
 	width: 100%;
+}
+
+footer{
+	margin-top: 50px;
+	border-top: 2px double #e0e0e0;
+	width: 100%;
+	text-align: center;
+}
+
+.markAsTitle{
+	cursor: pointer;
+	background-color: none;
+}
+
+.markAsTitle.active{
+	background-color: #F0F0F0; 
+}
+
+.markAsOptions{
+	position: absolute;
+	background-color: white;
+	border: 1px double #e0e0e0;
+	z-index: 100;
+}
+
+.markAsOptions a{
+	display: block;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	padding-left: 2px;
+	padding-right: 2px;
+	border-top: 1px double #e0e0e0;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+
+
+/* Change background color of buttons on hover */
+.markAsOptions a:hover {
+    background-color: #ddd;
+}
+
+.markAsOptions a.active{
+	background-color: #B0E0E6;
+	color: black;
+}
+.markAsOptions a.active:hover {
+	background-color: #B0E0E6;
+	color: black;
+}
+
+	
+.voteCount h1{
+	font-size: 48px;
+	text-align: center;
+}
+
+.voteCountContainer .vote {
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	border-top: 1px double #e0e0e0;
+	
+}
+
+.voteMeta{
+	float: left;
+	padding-right: 10px;
+}
+
+.voteMeta .voteNum{
+	display: block;
+	float:left;
+	padding-right: 10px;
+}
+.voteSubContainer{
+	overflow:hidden;
+}
+.subVote.negated{
+	text-decoration: line-through;
 }

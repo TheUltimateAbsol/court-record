@@ -10,14 +10,24 @@
 	<button href="#" id="messages-tab" class="tab">Messages</button>
 	<button href="#" id="players-tab" class="tab">Users</button>
 	<button href="#" id="factions-tab" class="tab">Factions</button>
+	<button href="#" id="analysis-tab" class="tab">Analysis</button>
 	<button href="#" id="settings-tab" class="tab">Settings</button>
 </div>
   <div id="popup" style="display:none">
-  	<form id="url-entry-popup-form" action="#">
+  	<div id="popup-background"></div>
+  	<form id="url-entry-popup-form" class="popup" action="#" style="display:none">
   		<h1 class="block">First, Enter the URL of the mafia thread to track</h1>
   		<input name="url" type="url" class="block" id="url-entry-popup-text"/>
   		<input type="submit" value = "Submit" form="url-entry-popup-form" class="block" id="url-entry-popup-submit"/>
 	</form>
+	<div id="confirmation-popup" class="popup" style="display:none">
+		<h1 id="confirmation-popup-title" class="block">Are you sure?</h1>
+		<button id="confirmation-popup-yes" class="bigButton">Yes</button>
+		<button id="confirmation-popup-no" class="bigButton">No</button>
+	</div>
+	<div id="post-popup" class="contentPage" style="display:none">
+	</div>
+	<a id="exit-popup" style="display:none;" href="#"><img src="images/exit.svg"/></a>
   </div>
 
   <div id="content">
@@ -38,16 +48,32 @@
 			</div>
 		</div>
 	  </div>
-	  <div id="posts" class="contentPage" ></div>
+	  <div class="contentPage" >
+	  <div id="posts"></div>
+	  <footer><h3>No posts showing up after typing in a URL? Press the "Fetch New Posts" button to 
+	  start downloading them.</h3>
+  	  </footer>
+	  </div>
 	</div>
   	<div id="player-page" style="display:none;" class="tabContent contentPage">
 		<div class="reminder">(Sorted by post timing, earliest to latest)</div>
-  		<button id="import-players">Update Players from Posts</button>
+  		<button id="import-players" class="page-button">Update Players from Posts</button>
   		<div id="players"></div>
   	</div>
   	<div id="factions" class="tabContent contentPage" style="display:none;"></div>
+  	<div id="analysis-page" class="tabContent contentPage" style="display:none;"> 	
+  		<div class="reminder">Press this button to analyze votes/interactions on posts!</div>
+  			<button id="analysis-button" class="page-button">Analyze Posts</button>
+  		<div id="vote-count"></div>	
+  	</div>
   	<div id="settings-page" class="tabContent contentPage" style="display:none;">
-  		<button id="clear-button">Clear All Data</button></div>
+  		<div id="url-list"></div>
+  		<button id="add-url-button">Add New URL</button>
+  		<footer><h3>Need to Track a new Game? Press this button</h3>
+  		<button id="clear-button">Clear All Data</button>
+  		</footer>
+  		
+  	</div>
   </div>
   
 
